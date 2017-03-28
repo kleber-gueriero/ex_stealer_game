@@ -28,7 +28,7 @@ defmodule ExStealerGame.Server do
     {:ok, client_input} = :gen_tcp.recv(client, 0)
     IO.puts("RECEIVED FROM CLIENT:")
     IO.inspect(client_input)
-    
+
     client_input
     |> String.split("|")
     |> handle_client_input(client)
@@ -45,6 +45,13 @@ defmodule ExStealerGame.Server do
     IO.puts("PLAYER #{player_name} JOINED THE GAME")
     Match.register_player(player_name, client)
 
+    send_score_to_client(client)
+  end
+
+  defp handle_client_input(["steal", target_id], client) do
+    IO.puts("STEALING FROM #{target_id}")
+    Match.get_player(client).id
+    |> Match.execute_steal(String.to_integer(target_id))
     send_score_to_client(client)
   end
 

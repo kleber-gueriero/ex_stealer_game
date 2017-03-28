@@ -25,17 +25,20 @@ defmodule ExStealerGame.Client do
     main_loop(socket)
   end
 
-  def handle_user_input(socket) do
+  defp steal(player_id, socket) do
+    send_to_server(player_id, :steal, socket)
+  end
+
+  defp handle_user_input(socket) do
     IO.gets("Who're you gonna steal?(just write the number of the user you want to steal and press ENTER)")
     |> String.replace("\n","")
-    |> IO.puts()
+    |> steal(socket)
   end
 
   defp read_server(socket) do
     {:ok, client_input} = :gen_tcp.recv(socket, 0)
 
     String.split(client_input, "|") |> handle_client_input(socket)
-    # read_server(socket)
   end
 
   defp handle_client_input(["update_score", players], socket) do
@@ -54,10 +57,6 @@ defmodule ExStealerGame.Client do
   end
 
   defp send_to_server(message, action, socket) do
-    IO.puts("SENDING TO SERVER:")
-    IO.puts(message)
-
     :gen_tcp.send(socket, "#{action}|#{message}")
-    IO.puts("SENT TO SERVER:")
   end
 end

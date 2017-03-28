@@ -17,6 +17,31 @@ defmodule ExStealerGame.Match do
   def get_players do
     Agent.get(__MODULE__, &(&1.players))
   end
+
+  def get_player(player_client) do
+    get_players()
+    |> Enum.find(fn(player) -> player.client_pid == player_client end)
+  end
+
+  def execute_steal(stealer_id, target_id) when stealer_id == target_id do
+  end
+
+  def execute_steal(stealer_id, target_id) do
+    Agent.update(__MODULE__, fn(match) ->
+      players = match.players
+      updated_players = Enum.map(players, fn(player) ->
+        IO.inspect(player)
+        case player do
+          %Player{id: ^stealer_id} -> %{player | score: player.score + 1}
+          %Player{id: ^target_id} -> %{player | score: player.score - 1}
+          _ -> player
+        end
+      end)
+
+      %{match | players: updated_players}
+    end)
+  end
+
   defp next_id do
     match().last_id + 1
   end
