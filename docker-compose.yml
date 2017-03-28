@@ -1,0 +1,19 @@
+version: '2'
+services:
+  app:
+    image: ex_stealer_game
+    build: .
+    volumes:
+      - .:/ex_stealer_game
+    working_dir: /ex_stealer_game
+    environment:
+      PORT: 4040
+    command: bash
+  server:
+    extends: app
+    ports: 
+      - "4040:4040"
+    command: mix run --no-halt
+  client:
+    extends: app
+    command: mix run -e "ExStealerGame.Client.connect()"
