@@ -1,4 +1,5 @@
 defmodule ExStealerGame.Client do
+  alias ExStealerGame.{Player}
   @host 'server'
   @port String.to_integer(System.get_env("PORT"))
 
@@ -6,14 +7,16 @@ defmodule ExStealerGame.Client do
     {:ok, socket} = :gen_tcp.connect(@host, @port,
       [:binary, active: false, reuseaddr: true])
 
-    IO.gets("What should I call you?\n") |> join_game(socket)
-    IO.puts "Connected on server"
+    IO.gets("What should I call you?\n")
+    |> join_game(socket)
 
     main_loop(socket)
   end
 
   defp join_game(player_name, socket) do
-    send_to_server(player_name, :join_game, socket)
+    player_name
+    |> String.replace("\n","")
+    |> send_to_server(:join_game, socket)
   end
 
   defp main_loop(socket) do
@@ -30,7 +33,24 @@ defmodule ExStealerGame.Client do
 
   defp read_server(socket) do
     {:ok, client_input} = :gen_tcp.recv(socket, 0)
-    IO.puts client_input
+
+    String.split(client_input, "|") |> handle_client_input(socket)
+    # read_server(socket)
+  end
+
+  defp handle_client_input(["update_score", players], socket) do
+    Poison.decode!(players)
+    |> print_ui()
+  end
+
+  defp print_ui(players) do
+    IO.write IO.ANSI.clear
+    IO.puts "CURRENT SCORE:"
+
+    Enum.reverse(players)
+    |> Enum.each(fn(player) ->
+         IO.puts("##{player["id"]} - #{player["name"]} #{String.duplicate("# ", player["score"])}\n")
+       end)
   end
 
   defp send_to_server(message, action, socket) do

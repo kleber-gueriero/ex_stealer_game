@@ -34,16 +34,23 @@ defmodule ExStealerGame.Server do
     |> handle_client_input(client)
   end
 
-  defp send_to_client(message, client) do
+  defp send_to_client(message, action, client) do
     IO.puts("SENDING TO CLIENT:")
     IO.inspect(message)
 
-    :gen_tcp.send(client, message)
+    :gen_tcp.send(client, "#{action}|#{message}")
   end
 
   defp handle_client_input(["join_game", player_name], client) do
     IO.puts("PLAYER #{player_name} JOINED THE GAME")
     Match.register_player(player_name, client)
-    send_to_client("SERVER MESSAGE: YOU JOINED THE GAME", client)
+
+    send_score_to_client(client)
+  end
+
+  defp send_score_to_client(client) do
+    Match.get_players 
+    |> Poison.encode!()
+    |> send_to_client("update_score", client)
   end
 end

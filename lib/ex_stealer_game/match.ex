@@ -14,6 +14,9 @@ defmodule ExStealerGame.Match do
     new_player
   end
 
+  def get_players do
+    Agent.get(__MODULE__, &(&1.players))
+  end
   defp next_id do
     match().last_id + 1
   end
