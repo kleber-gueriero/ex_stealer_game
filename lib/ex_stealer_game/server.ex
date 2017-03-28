@@ -45,19 +45,22 @@ defmodule ExStealerGame.Server do
     IO.puts("PLAYER #{player_name} JOINED THE GAME")
     Match.register_player(player_name, client)
 
-    send_score_to_client(client)
+    send_score_to_clients
   end
 
   defp handle_client_input(["steal", target_id], client) do
     IO.puts("STEALING FROM #{target_id}")
     Match.get_player(client).id
     |> Match.execute_steal(String.to_integer(target_id))
-    send_score_to_client(client)
+    send_score_to_clients
   end
 
-  defp send_score_to_client(client) do
-    Match.get_players 
-    |> Poison.encode!()
-    |> send_to_client("update_score", client)
+  defp send_score_to_clients do
+    players = Match.get_players
+    Enum.each(players, fn(player) ->
+      players
+      |> Poison.encode!()
+      |> send_to_client("update_score", player.client_pid)
+    end)
   end
 end

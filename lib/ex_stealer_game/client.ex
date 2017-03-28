@@ -10,6 +10,7 @@ defmodule ExStealerGame.Client do
     IO.gets("What should I call you?\n")
     |> join_game(socket)
 
+    Task.start_link(fn -> read_loop(socket) end)
     main_loop(socket)
   end
 
@@ -20,7 +21,6 @@ defmodule ExStealerGame.Client do
   end
 
   defp main_loop(socket) do
-    read_server(socket)
     handle_user_input(socket)
     main_loop(socket)
   end
@@ -35,10 +35,11 @@ defmodule ExStealerGame.Client do
     |> steal(socket)
   end
 
-  defp read_server(socket) do
+  defp read_loop(socket) do
     {:ok, client_input} = :gen_tcp.recv(socket, 0)
 
     String.split(client_input, "|") |> handle_client_input(socket)
+    read_loop(socket)
   end
 
   defp handle_client_input(["update_score", players], socket) do
@@ -47,13 +48,16 @@ defmodule ExStealerGame.Client do
   end
 
   defp print_ui(players) do
-    IO.write IO.ANSI.clear
-    IO.puts "CURRENT SCORE:"
-
-    Enum.reverse(players)
-    |> Enum.each(fn(player) ->
-         IO.puts("##{player["id"]} - #{player["name"]} #{String.duplicate("# ", player["score"])}\n")
+    score_string = Enum.reverse(players)
+    |> Enum.map(fn(player) ->
+         "##{player["id"]} - #{player["name"]} #{String.duplicate("# ", player["score"])}\n"
        end)
+
+    IO.puts """
+    #{IO.ANSI.clear}
+    CURRENT SCORE:
+    #{score_string}
+    """
   end
 
   defp send_to_server(message, action, socket) do
