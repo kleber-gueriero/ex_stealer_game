@@ -8,6 +8,7 @@ defmodule ExStealerGame.Supervisor do
   def init(_) do
     children = [
       worker(Task, [ExStealerGame.Server, :start_server, []]),
+      worker(ExStealerGame.Match, []),
     ]
 
     supervise children, strategy: :one_for_one

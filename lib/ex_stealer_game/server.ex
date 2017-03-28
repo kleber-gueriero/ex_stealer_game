@@ -1,4 +1,5 @@
 defmodule ExStealerGame.Server do
+  alias ExStealerGame.Match
   @port String.to_integer(System.get_env("PORT"))
 
   def start_server() do
@@ -28,7 +29,9 @@ defmodule ExStealerGame.Server do
     IO.puts("RECEIVED FROM CLIENT:")
     IO.inspect(client_input)
     
-    send_to_client("SERVER ECHO: #{client_input}", client)
+    client_input
+    |> String.split("|")
+    |> handle_client_input(client)
   end
 
   defp send_to_client(message, client) do
@@ -36,5 +39,11 @@ defmodule ExStealerGame.Server do
     IO.inspect(message)
 
     :gen_tcp.send(client, message)
+  end
+
+  defp handle_client_input(["join_game", player_name], client) do
+    IO.puts("PLAYER #{player_name} JOINED THE GAME")
+    Match.register_player(player_name, client)
+    send_to_client("SERVER MESSAGE: YOU JOINED THE GAME", client)
   end
 end

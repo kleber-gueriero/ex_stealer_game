@@ -6,9 +6,14 @@ defmodule ExStealerGame.Client do
     {:ok, socket} = :gen_tcp.connect(@host, @port,
       [:binary, packet: :line, active: false, reuseaddr: true])
 
+    IO.gets("What should I call you?\n") |> join_game(socket)
     IO.puts "Connected on server"
 
     main_loop(socket)
+  end
+
+  defp join_game(player_name, socket) do
+    send_to_server(player_name, :join_game, socket)
   end
 
   defp main_loop(socket) do
@@ -20,7 +25,7 @@ defmodule ExStealerGame.Client do
   def handle_user_input(socket) do
     IO.gets("Who're you gonna steal?(just write the number of the user you want to steal and press ENTER)")
     |> String.replace("\n","")
-    |> send_to_server(socket)
+    |> IO.puts()
   end
 
   defp read_server(socket) do
@@ -28,10 +33,11 @@ defmodule ExStealerGame.Client do
     IO.puts client_input
   end
 
-  defp send_to_server(message, socket) do
+  defp send_to_server(message, action, socket) do
     IO.puts("SENDING TO SERVER:")
     IO.puts(message)
-    :gen_tcp.send(socket, message)
-    IO.puts("SENT TO SERVER")
+
+    :gen_tcp.send(socket, "#{action}|#{message}")
+    IO.puts("SENT TO SERVER:")
   end
 end
