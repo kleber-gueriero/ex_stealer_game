@@ -5,7 +5,7 @@ defmodule ExStealerGame.Server do
   def start_server() do
     IO.puts "STARTING SERVER"
     {:ok, socket} = :gen_tcp.listen(@port,
-      [:binary, packet: :line, active: false, reuseaddr: true])
+      [:binary, active: false, reuseaddr: true])
     IO.puts "SERVER STARTED"
 
     accept_connection(socket)

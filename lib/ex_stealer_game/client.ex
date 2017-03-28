@@ -4,7 +4,7 @@ defmodule ExStealerGame.Client do
 
   def connect do
     {:ok, socket} = :gen_tcp.connect(@host, @port,
-      [:binary, packet: :line, active: false, reuseaddr: true])
+      [:binary, active: false, reuseaddr: true])
 
     IO.gets("What should I call you?\n") |> join_game(socket)
     IO.puts "Connected on server"
