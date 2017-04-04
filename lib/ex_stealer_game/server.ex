@@ -71,10 +71,15 @@ defmodule ExStealerGame.Server do
   defp handle_match_state(winners) do
     Match.get_players
     |> Enum.each(fn(player) ->
-         "End of Match. Winners: #{Enum.join(Enum.map(winners, &(&1.name)))}\n"
+         """
+         End of Match.
+         Winners: #{Enum.join(Enum.map(winners, &(&1.name)))}
+         Next Match is going to start in a few seconds
+         """
          |> send_to_client(player.client_pid)
 
        end)
+    :timer.sleep 2000
     Match.restart_match
   end
 
