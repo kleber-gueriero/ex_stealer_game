@@ -2,10 +2,17 @@ defmodule ExStealerGame.Match do
   alias ExStealerGame.{Match, Player}
   defstruct [:last_id, {:players, []}]
 
-  @starting_score 10
+  @starting_score 20
+  @score_to_win 30
 
   def start_link do
     Agent.start_link(fn -> %Match{last_id: 0} end, name: __MODULE__)
+  end
+
+  def restart_match do
+    Agent.update(__MODULE__, fn(current_match) ->
+      %{current_match | players: Enum.map(current_match.players, &(%{&1 | score: @starting_score}))}
+    end)
   end
 
   def register_player(player_name, client_pid) do
@@ -46,6 +53,11 @@ defmodule ExStealerGame.Match do
 
       %{match | players: updated_players}
     end)
+  end
+
+  def get_winners do
+    get_players()
+    |> Enum.filter(fn(player) -> player.score == @score_to_win end)
   end
 
   defp next_id do

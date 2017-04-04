@@ -57,9 +57,25 @@ defmodule ExStealerGame.Server do
         IO.puts("STEALING FROM #{target_id}")
         Match.get_player(client).id
         |> Match.execute_steal(target_id)
-        send_score_to_clients()
+
+        Match.get_winners
+        |> handle_match_state
       :error -> send_score_to_clients()
     end
+  end
+
+  defp handle_match_state([]) do
+    send_score_to_clients()
+  end
+
+  defp handle_match_state(winners) do
+    Match.get_players
+    |> Enum.each(fn(player) ->
+         "End of Match. Winners: #{Enum.join(Enum.map(winners, &(&1.name)))}\n"
+         |> send_to_client(player.client_pid)
+
+       end)
+    Match.restart_match
   end
 
   defp send_score_to_clients do
