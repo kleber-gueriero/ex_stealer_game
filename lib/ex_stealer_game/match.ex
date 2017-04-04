@@ -10,8 +10,14 @@ defmodule ExStealerGame.Match do
 
   def register_player(player_name, client_pid) do
     new_player = %Player{id: next_id(), name: player_name, score: @starting_score, client_pid: client_pid}
-    Agent.update(__MODULE__, fn(match) -> %{match | last_id: new_player.id, players: [new_player | match.players]} end)
+    Agent.update(__MODULE__, fn(current_match) -> %{current_match | last_id: new_player.id, players: [new_player | current_match.players]} end)
     new_player
+  end
+
+  def remove_player(player) do
+    Agent.update(__MODULE__, fn(current_match) ->
+      %{current_match | players: List.delete(current_match.players, player)}
+    end)
   end
 
   def get_players do

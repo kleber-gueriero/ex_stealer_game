@@ -47,11 +47,8 @@ defmodule ExStealerGame.Server do
     :gen_tcp.send(client, message)
   end
 
-  defp handle_client_input(["join_game", player_name], client) do
-    IO.puts("PLAYER #{player_name} JOINED THE GAME")
-    Match.register_player(player_name, client)
-
-    send_score_to_clients
+  defp handle_match_message("quit", client) do
+    quit_player(client)
   end
 
   defp handle_match_message(message, client) do
@@ -104,5 +101,14 @@ defmodule ExStealerGame.Server do
     |> Match.register_player(client)
 
     send_score_to_clients()
+  end
+
+  defp quit_player(client) do
+    IO.puts "PLAYER QUITTING"
+    Match.get_player(client)
+    |> Match.remove_player
+
+    send_score_to_clients()
+    Process.exit(self(), :kill)
   end
 end
