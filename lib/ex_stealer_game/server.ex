@@ -15,7 +15,8 @@ defmodule ExStealerGame.Server do
     {:ok, client} = :gen_tcp.accept(socket)
     IO.puts "NEW CLIENT CONNECTED"
 
-    Task.async(fn -> server_loop(client) end)
+    {:ok, pid} = Task.start(fn -> server_loop(client) end)
+    :gen_tcp.controlling_process(client, pid)
     accept_connection(socket)
   end
 
