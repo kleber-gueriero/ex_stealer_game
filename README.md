@@ -40,3 +40,8 @@ begining, that's the player's id) and hit enter, the target player is going to l
 and you're going to receive 1 point.
 
 The game ends when one player reach the double of starting points(as default, it would be 20)
+
+PrintScreen
+-----------
+
+![screenshot](https://github.com/kleberngueriero/ex_stealer_game/blob/master/screenshot.png)
